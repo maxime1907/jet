@@ -1,0 +1,12 @@
+hash: db078537c467967fb3419a29e245d5e7c47a02f4734218c8d2175e0c329a2ff9
+updated: 2018-06-25T09:39:59.442324678Z
+imports:
+- name: github.com/CloudyKit/fastprinter
+  version: 74b38d55f37af5d6c05ca11147d616b613a3420e
+- name: github.com/shurcooL/httpfs
+  version: 809beceb23714880abc4a382a00c05f89d13b1cc
+  subpackages:
+  - vfsutil
+- name: github.com/shurcooL/vfsgen
+  version: bded413e56ef86004fb6a11dd9d1bb9dc118ed03
+testImports: []
