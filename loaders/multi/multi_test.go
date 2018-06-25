@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/CloudyKit/jet"
-	"github.com/CloudyKit/jet/jettest"
-	"github.com/CloudyKit/jet/loaders/httpfs"
+	"github.com/maxime1907/jet"
+	"github.com/maxime1907/jet/jettest"
+	"github.com/maxime1907/jet/loaders/httpfs"
 )
 
 func TestZeroLoaders(t *testing.T) {

@@ -25,7 +25,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/CloudyKit/jet"
+	"github.com/maxime1907/jet"
 )
 
 var views = jet.NewHTMLSet("./views")

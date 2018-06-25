@@ -1,0 +1,4 @@
+package: github.com/maxime1907/jet
+import:
+- package: github.com/CloudyKit/fastprinter
+- package: github.com/shurcooL/vfsgen
