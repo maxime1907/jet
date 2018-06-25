@@ -650,6 +650,40 @@ func (st *Runtime) evalPrimaryExpressionGroup(node Expression) reflect.Value {
 	return st.evalBaseExpressionGroup(node)
 }
 
+func ParseByType(baseExpression reflect.Value, indexExpression reflect.Value, indexType reflect.Type) (bool, error) {
+	switch baseExpression.Kind() {
+	case reflect.Map:
+		key := baseExpression.Type().Key()
+		if !indexType.AssignableTo(key) {
+			if indexType.ConvertibleTo(key) {
+				indexExpression = indexExpression.Convert(key)
+			} else {
+				return false, errors.New(indexType.String() + " is not assignable|convertible to map key " + key.String())
+			}
+		}
+		return baseExpression.MapIndex(indexExpression).IsValid(), nil
+	case reflect.Array, reflect.String, reflect.Slice:
+		if canNumber(indexType.Kind()) {
+			i := int(castInt64(indexExpression))
+			return i >= 0 && i < baseExpression.Len(), nil
+		} else {
+			return false, errors.New("non numeric value in index expression kind " + baseExpression.Kind().String())
+		}
+	case reflect.Struct:
+		if canNumber(indexType.Kind()) {
+			i := int(castInt64(indexExpression))
+			return i >= 0 && i < baseExpression.NumField(), nil
+		} else if indexType.Kind() == reflect.String {
+			return getFieldOrMethodValue(indexExpression.String(), baseExpression).IsValid(), nil
+		} else {
+			return false, errors.New("non numeric value in index expression kind " + baseExpression.Kind().String())
+		}
+	default:
+		return ParseByType(reflect.ValueOf(baseExpression.Interface()), indexExpression, indexType)
+	}
+	return false, errors.New("indexing is not supported in value type " + baseExpression.Kind().String())
+}
+
 func (st *Runtime) isSet(node Node) bool {
 	nodeType := node.Type()
 
@@ -672,36 +706,12 @@ func (st *Runtime) isSet(node Node) bool {
 			baseExpression = baseExpression.Elem()
 		}
 
-		switch baseExpression.Kind() {
-		case reflect.Map:
-			key := baseExpression.Type().Key()
-			if !indexType.AssignableTo(key) {
-				if indexType.ConvertibleTo(key) {
-					indexExpression = indexExpression.Convert(key)
-				} else {
-					node.errorf("%s is not assignable|convertible to map key %s", indexType.String(), key.String())
-				}
-			}
-			return baseExpression.MapIndex(indexExpression).IsValid()
-		case reflect.Array, reflect.String, reflect.Slice:
-			if canNumber(indexType.Kind()) {
-				i := int(castInt64(indexExpression))
-				return i >= 0 && i < baseExpression.Len()
-			} else {
-				node.errorf("non numeric value in index expression kind %s", baseExpression.Kind().String())
-			}
-		case reflect.Struct:
-			if canNumber(indexType.Kind()) {
-				i := int(castInt64(indexExpression))
-				return i >= 0 && i < baseExpression.NumField()
-			} else if indexType.Kind() == reflect.String {
-				return getFieldOrMethodValue(indexExpression.String(), baseExpression).IsValid()
-			} else {
-				node.errorf("non numeric value in index expression kind %s", baseExpression.Kind().String())
-			}
-		default:
-			node.errorf("indexing is not supported in value type %s", baseExpression.Kind().String())
+		ret, err := ParseByType(baseExpression, indexExpression, indexType)
+		if err != nil {
+			node.errorf(err.Error())
 		}
+		return ret
+
 	case NodeIdentifier:
 		if st.Resolve(node.String()).IsValid() == false {
 			return false
