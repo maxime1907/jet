@@ -192,6 +192,25 @@ func (state *Runtime) setValue(name string, val reflect.Value) bool {
 	return true
 }
 
+func (state *Runtime) getAssignedValue(name string) (reflect.Value, error) {
+	sc := state.scope
+
+	// try to resolve variables in the current scope
+	_, ok := sc.variables[name]
+
+	// if not found walks parent scopes
+	for !ok && sc.parent != nil {
+		sc = sc.parent
+		_, ok = sc.variables[name]
+	}
+
+	if ok {
+		return sc.variables[name], nil
+	}
+
+	return reflect.ValueOf(nil), errors.New("Variable " + name + " is not set")
+}
+
 // Resolve resolves a value from the execution context
 func (state *Runtime) Resolve(name string) reflect.Value {
 
@@ -235,7 +254,13 @@ func (st *Runtime) recover(err *error) {
 	}
 }
 
-func (st *Runtime) executeSet(left Expression, right reflect.Value) {
+func (st *Runtime) executeSet(left Expression, right reflect.Value, isdefault bool) {
+	if isdefault == true {
+		_, err := st.getAssignedValue(left.String())
+		if err == nil {
+			return
+		}
+	}
 	typ := left.Type()
 	if typ == NodeIdentifier {
 		st.setValue(left.(*IdentifierNode).Ident, right)
@@ -275,18 +300,18 @@ RESTART:
 	}
 }
 
-func (st *Runtime) executeSetList(set *SetNode) {
+func (st *Runtime) executeSetList(set *SetNode, isdefault bool) {
 	if set.IndexExprGetLookup {
 		value := st.evalPrimaryExpressionGroup(set.Right[0])
-		st.executeSet(set.Left[0], value)
+		st.executeSet(set.Left[0], value, isdefault)
 		if value.IsValid() {
-			st.executeSet(set.Left[1], valueBoolTRUE)
+			st.executeSet(set.Left[1], valueBoolTRUE, isdefault)
 		} else {
-			st.executeSet(set.Left[1], valueBoolFALSE)
+			st.executeSet(set.Left[1], valueBoolFALSE, isdefault)
 		}
 	} else {
 		for i := 0; i < len(set.Left); i++ {
-			st.executeSet(set.Left[i], st.evalPrimaryExpressionGroup(set.Right[i]))
+			st.executeSet(set.Left[i], st.evalPrimaryExpressionGroup(set.Right[i]), isdefault)
 		}
 	}
 }
@@ -442,6 +467,62 @@ func (ot *TextFilter) FormatOutput() []byte {
 	return out
 }
 
+func (st *Runtime) executeSwitch(list *ListNode, value reflect.Value) {
+	var defaultNode *CaseNode = nil
+	var found = false
+
+	for i := 0; i < len(list.Nodes); i++ {
+		node := list.Nodes[i]
+		switch node.Type() {
+		case NodeCase:
+			node := node.(*CaseNode)
+
+			if node.Expression.Type() == NodeUndefined {
+				defaultNode = node
+			} else {
+				myvalue := st.evalPrimaryExpressionGroup(node.Expression)
+
+				left := fmt.Sprintf("%v", value)
+				right := fmt.Sprintf("%v", myvalue)
+
+				if left == right {
+					found = true
+					st.executeList(node.List)
+				}
+			}
+		}
+	}
+	if found == false && defaultNode != nil {
+		st.executeList(defaultNode.List)
+	}
+}
+
+func (st *Runtime) executeDefault(list *ListNode) {
+	for i := 0; i < len(list.Nodes); i++ {
+		node := list.Nodes[i]
+		switch node.Type() {
+		case NodeAction:
+			node := node.(*ActionNode)
+
+			if node.Pipe != nil || node.Set == nil || node.Set.Let == true {
+				node.errorf("unexpected data in default block")
+			}
+
+			st.executeSetList(node.Set, true)
+
+		case NodeText:
+			node := node.(*TextNode)
+			for _, value := range node.String() {
+				if value != '\n' && value != '\t' && value != ' ' {
+					node.errorf("unexpected data in default block")
+				}
+			}
+		default:
+			node.errorf("unexpected data in default block")
+		}
+	}
+}
+
 func (st *Runtime) executeList(list *ListNode) {
 	inNewSCOPE := false
 
@@ -472,7 +553,7 @@ func (st *Runtime) executeList(list *ListNode) {
 					}
 					st.executeLetList(node.Set)
 				} else {
-					st.executeSetList(node.Set)
+					st.executeSetList(node.Set, false)
 				}
 			}
 			if node.Pipe != nil {
@@ -493,6 +574,18 @@ func (st *Runtime) executeList(list *ListNode) {
 					}
 				}
 			}
+		case NodeDefault:
+			node := node.(*DefaultNode)
+
+			st.executeDefault(node.List)
+
+		case NodeSwitch:
+			node := node.(*SwitchNode)
+
+			value := st.evalPrimaryExpressionGroup(node.Expression)
+
+			st.executeSwitch(node.List, value)
+
 		case NodeFilter:
 			node := node.(*FilterNode)
 			var isLet bool
@@ -502,7 +595,7 @@ func (st *Runtime) executeList(list *ListNode) {
 					st.newScope()
 					st.executeLetList(node.Set)
 				} else {
-					st.executeSetList(node.Set)
+					st.executeSetList(node.Set, false)
 				}
 			}
 
@@ -534,7 +627,7 @@ func (st *Runtime) executeList(list *ListNode) {
 					st.newScope()
 					st.executeLetList(node.Set)
 				} else {
-					st.executeSetList(node.Set)
+					st.executeSetList(node.Set, false)
 				}
 			}
 
@@ -581,10 +674,10 @@ func (st *Runtime) executeList(list *ListNode) {
 							}
 						} else {
 							if isKeyVal {
-								st.executeSet(node.Set.Left[0], indexValue)
-								st.executeSet(node.Set.Left[1], rangeValue)
+								st.executeSet(node.Set.Left[0], indexValue, false)
+								st.executeSet(node.Set.Left[1], rangeValue, false)
 							} else {
-								st.executeSet(node.Set.Left[0], rangeValue)
+								st.executeSet(node.Set.Left[0], rangeValue, false)
 							}
 						}
 					} else {
@@ -804,7 +897,7 @@ func ParseByType(baseExpression reflect.Value, indexExpression reflect.Value, in
 		} else {
 			return false, errors.New("non numeric value in index expression kind " + baseExpression.Kind().String())
 		}
-	default:
+	case reflect.Interface:
 		return ParseByType(reflect.ValueOf(baseExpression.Interface()), indexExpression, indexType)
 	}
 	return false, errors.New("indexing is not supported in value type " + baseExpression.Kind().String())
@@ -1151,7 +1244,7 @@ func (st *Runtime) evalAdditiveExpression(node *AdditiveExprNode) reflect.Value 
 			if isAdditive {
 				return reflect.ValueOf(leftRes + rightRes)
 			} else {
-				return reflect.ValueOf(leftRes - rightRes)				
+				return reflect.ValueOf(leftRes - rightRes)
 			}
 		}
 	} else {
