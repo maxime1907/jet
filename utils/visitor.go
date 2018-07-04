@@ -3,7 +3,7 @@ package utils
 import (
 	"fmt"
 
-	"github.com/maxime1907/jet"
+	"github.com/CloudyKit/jet"
 )
 
 // Walk walks the template ast and calls the Visit method on each node of the tree
