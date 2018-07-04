@@ -22,10 +22,10 @@ import (
 	"os"
 	"strings"
 
-	"github.com/maxime1907/jet"
-	"github.com/maxime1907/jet/examples/asset_packaging/assets/templates"
-	"github.com/maxime1907/jet/loaders/httpfs"
-	"github.com/maxime1907/jet/loaders/multi"
+	"github.com/CloudyKit/jet"
+	"github.com/CloudyKit/jet/examples/asset_packaging/assets/templates"
+	"github.com/CloudyKit/jet/loaders/httpfs"
+	"github.com/CloudyKit/jet/loaders/multi"
 )
 
 // Initialize the set with both local files as well as the packaged
