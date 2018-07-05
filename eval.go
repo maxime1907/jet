@@ -574,18 +574,32 @@ func (st *Runtime) executeList(list *ListNode) {
 					}
 				}
 			}
+		case NodeWhile:
+			node := node.(*WhileNode)
+			var isLet bool
+			if node.Set != nil {
+				if node.Set.Let {
+					isLet = true
+					st.newScope()
+					st.executeLetList(node.Set)
+				} else {
+					st.executeSetList(node.Set, false)
+				}
+			}
+
+			for castBoolean(st.evalPrimaryExpressionGroup(node.Expression)) {
+				st.executeList(node.List)
+			}
+			if isLet {
+				st.releaseScope()
+			}
 		case NodeDefault:
 			node := node.(*DefaultNode)
-
 			st.executeDefault(node.List)
-
 		case NodeSwitch:
 			node := node.(*SwitchNode)
-
 			value := st.evalPrimaryExpressionGroup(node.Expression)
-
 			st.executeSwitch(node.List, value)
-
 		case NodeFilter:
 			node := node.(*FilterNode)
 			var isLet bool
@@ -600,24 +614,18 @@ func (st *Runtime) executeList(list *ListNode) {
 			}
 
 			mynode := st.evalPrimaryExpressionGroup(node.Expression)
-
 			optionText.SetValue(mynode.String())
-
 			st.executeList(node.List)
 
 			out := optionText.FormatOutput()
-
 			_, err := st.Writer.Write(out)
 			if err != nil {
 				node.error(err)
 			}
-
 			optionText.Reset()
-
 			if isLet {
 				st.releaseScope()
 			}
-
 		case NodeIf:
 			node := node.(*IfNode)
 			var isLet bool

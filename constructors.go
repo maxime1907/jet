@@ -134,6 +134,10 @@ func (t *Template) newSwitch(pos Pos, line int, set *SetNode, pipe Expression, l
 	return &SwitchNode{BranchNode{NodeBase: NodeBase{TemplateName: t.Name, NodeType: NodeSwitch, Pos: pos, Line: line}, Set: set, Expression: pipe, List: list, ElseList: elseList}}
 }
 
+func (t *Template) newWhile(pos Pos, line int, set *SetNode, pipe Expression, list, elseList *ListNode) *WhileNode {
+	return &WhileNode{BranchNode{NodeBase: NodeBase{TemplateName: t.Name, NodeType: NodeWhile, Pos: pos, Line: line}, Set: set, Expression: pipe, List: list, ElseList: elseList}}
+}
+
 func (t *Template) newIf(pos Pos, line int, set *SetNode, pipe Expression, list, elseList *ListNode) *IfNode {
 	return &IfNode{BranchNode{NodeBase: NodeBase{TemplateName: t.Name, NodeType: NodeIf, Pos: pos, Line: line}, Set: set, Expression: pipe, List: list, ElseList: elseList}}
 }

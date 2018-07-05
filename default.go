@@ -23,6 +23,7 @@ import (
 	"reflect"
 	"strings"
 	"text/template"
+	"regexp"
 )
 
 var defaultExtensions = []string{
@@ -55,6 +56,12 @@ func init() {
 		"format": reflect.ValueOf(Func(func(a Arguments) reflect.Value {
 			a.RequireNumOfArguments("format", 1, -1)
 			return reflect.ValueOf("format:" + a.Get(0).String())
+		})),
+		"match": reflect.ValueOf(Func(func(a Arguments) reflect.Value {
+			a.RequireNumOfArguments("match", 2, -1)
+			re := regexp.MustCompile(a.Get(1).String())
+			res := re.FindStringSubmatch(a.Get(0).String())
+			return reflect.ValueOf(res)
 		})),
 		"isset": reflect.ValueOf(Func(func(a Arguments) reflect.Value {
 			a.RequireNumOfArguments("isset", 1, -1)

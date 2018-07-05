@@ -104,6 +104,7 @@ const (
 	itemDefault
 	itemSwitch
 	itemCase
+	itemWhile
 )
 
 var key = map[string]itemType{
@@ -119,6 +120,7 @@ var key = map[string]itemType{
 	"end":  	itemEnd,
 	"if":   	itemIf,
 	"switch": 	itemSwitch,
+	"while": 	itemWhile,
 
 	"case": 	itemCase,
 

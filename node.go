@@ -83,6 +83,7 @@ const (
 	NodeCase					   //A case action
 	NodeSwitch					   //A switch action
 	NodeFilter					   //A filter action
+	NodeWhile					   //A while action
 	NodeIf                         //An if action.
 	NodeList                       //A list of Nodes.
 	NodePipe                       //A pipeline of commands.
@@ -460,6 +461,12 @@ func (b *BranchNode) String() string {
 			s = b.Set.String() + ";"
 		}
 		return fmt.Sprintf("{{case %s%s}}%s{{end}}", s, b.Expression, b.List)
+	} else if b.NodeType == NodeWhile {
+		s := ""
+		if b.Set != nil {
+			s = b.Set.String() + ";"
+		}
+		return fmt.Sprintf("{{while %s%s}}%s{{end}}", s, b.Expression, b.List)
 	} else {
 		s := ""
 		if b.Set != nil {
@@ -479,6 +486,11 @@ type FilterNode struct {
 
 // CaseNode represents a {{case}} action and its commands.
 type CaseNode struct {
+	BranchNode
+}
+
+// WhileNode represents a {{while}} action and its commands.
+type WhileNode struct {
 	BranchNode
 }
 

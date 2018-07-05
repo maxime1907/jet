@@ -529,6 +529,10 @@ func (t *Template) caseControl() Node {
 	return t.newCase(t.parseCase())
 }
 
+func (t *Template) whileControl() Node {
+	return t.newWhile(t.parseControl(false, "while"))
+}
+
 func (t *Template) action() (n Node) {
 	switch token := t.nextNonSpace(); token.typ {
 	case itemElse:
@@ -555,6 +559,8 @@ func (t *Template) action() (n Node) {
 		return t.switchControl()
 	case itemCase:
 		return t.caseControl()
+	case itemWhile:
+		return t.whileControl()
 	}
 
 	t.backup()
