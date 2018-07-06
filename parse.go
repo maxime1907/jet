@@ -571,7 +571,7 @@ func (t *Template) action() (n Node) {
 		action.Set = expr.(*SetNode)
 		expr = nil
 	}
-	if action.Set == nil || t.expectOneOf(itemColonComma, itemRightDelim, "command").typ == itemColonComma {
+	if action.Set == nil || t.expectOneOf(itemSemicolon, itemRightDelim, "command").typ == itemSemicolon {
 		action.Pipe = t.pipeline("command", expr)
 	}
 	return action
@@ -894,6 +894,9 @@ func (t *Template) parseArguments() (args []Expression) {
 			args = append(args, expr)
 			switch endtoken.typ {
 			case itemComma:
+				if t.peekNonSpace().typ == itemRightParen {
+					break loop
+				}
 				continue loop
 			default:
 				t.backup()
@@ -929,7 +932,7 @@ func (t *Template) parseControl(allowElseIf bool, context string) (pos Pos, line
 	if expression.Type() == NodeSet {
 		set = expression.(*SetNode)
 		if context != "range" {
-			t.expect(itemColonComma, context)
+			t.expect(itemSemicolon, context)
 			expression = t.expression(context)
 		} else {
 			expression = nil

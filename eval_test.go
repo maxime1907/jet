@@ -121,13 +121,13 @@ func RunJetTestWithTemplate(t *testing.T, tt *Template, variables VarMap, contex
 		{
 			Name: fmt.Sprintf("\tJetTest(%s)", tt.Name),
 			F: func(t *testing.T) {
-				buff := bytes.NewBuffer(nil)
-				err := tt.Execute(buff, variables, context)
+				var buf bytes.Buffer
+				err := tt.Execute(&buf, variables, context)
 				if err != nil {
 					t.Errorf("Eval error: %q executing %s", err.Error(), tt.Name)
 					return
 				}
-				result := buff.String()
+				result := strings.Replace(buf.String(), "\r\n", "\n", -1)
 				if result != testExpected {
 					t.Errorf("Result error expected %q got %q on %s", testExpected, result, tt.Name)
 				}
@@ -243,6 +243,37 @@ func TestEvalBlockYieldIncludeNode(t *testing.T) {
 		`{{import "BlockContentLib"}}{{yield row(cols="12") content}}{{cols}}{{end}}`,
 		"\n    <div class=\"row\">\n        \n            \n    <div class=\"col 12\">12</div>\n\n        \n    </div>\n")
 
+	JetTestingSet.LoadTemplate("BlockContentLib2", `
+		{{block col(
+			columns,
+		)}}
+			<div class="col {{columns}}">{{yield content}}</div>
+		{{end}}
+		{{block row(
+			cols="",
+			rowClass="",
+		)}}
+			<div class="row {{ rowClass }}">
+				{{if len(cols) > 0}}
+					{{yield col(columns=cols) content}}
+						{{yield content}}
+					{{end}}
+				{{else}}
+					{{yield content}}
+				{{end}}
+			</div>
+		{{end}}
+	`)
+	RunJetTest(t, nil, nil, "BlockContentParam2",
+		`{{import "BlockContentLib2"}}
+		{{yield row(
+			cols="12",
+			rowClass="highlight-row",
+		) content}}
+			{{cols}}
+		{{end}}`,
+		"\n\t\t\t<div class=\"row highlight-row\">\n\t\t\t\t\n\t\t\t\t\t\n\t\t\t<div class=\"col 12\">\n\t\t\t\t\t\t\n\t\t\t12\n\t\t\n\t\t\t\t\t</div>\n\t\t\n\t\t\t\t\n\t\t\t</div>\n\t\t",
+	)
 }
 
 func TestEvalRangeNode(t *testing.T) {
@@ -271,6 +302,14 @@ func TestEvalDefaultFuncs(t *testing.T) {
 	RunJetTest(t, nil, &User{"Mario Santos", "mario@gmail.com"}, "DefaultFuncs_json", `{{. |writeJson}}`, "{\"Name\":\"Mario Santos\",\"Email\":\"mario@gmail.com\"}\n")
 
 	RunJetTest(t, nil, nil, "DefaultFuncs_replace", `{{replace("My Name Is", " ", "_", -1)}}`, "My_Name_Is")
+	RunJetTest(t, nil, nil, "DefaultFuncs_replace_multiline_statement",
+		`{{replace("My Name Is II",
+			" ",
+			"_",
+			-1,
+		)}}`,
+		"My_Name_Is_II",
+	)
 }
 
 func TestEvalIssetAndTernaryExpression(t *testing.T) {
