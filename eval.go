@@ -301,7 +301,7 @@ RESTART:
 		}
 		value.Set(right)
 	case reflect.Map:
-		value.SetMapIndex(reflect.ValueOf(fields[lef]), right)
+		value.SetMapIndex(reflect.ValueOf(&fields[lef]).Elem(), right)
 	}
 }
 
