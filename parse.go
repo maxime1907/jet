@@ -677,7 +677,7 @@ func (t *Template) assignmentOrExpression(context string) (operand Expression) {
 	leftloop:
 		for {
 			switch operand.Type() {
-			case NodeField, NodeChain, NodeIdentifier:
+			case NodeField, NodeChain, NodeIdentifier, NodeIndexExpr:
 				left = append(left, operand)
 			default:
 				t.errorf("unexpected node in assign")

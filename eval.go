@@ -272,6 +272,11 @@ func (st *Runtime) executeSet(left Expression, right reflect.Value, isdefault bo
 		chain := left.(*ChainNode)
 		value = st.evalPrimaryExpressionGroup(chain.Node)
 		fields = chain.Field
+	} else if typ == NodeIndexExpr {
+		node := left.(*IndexExprNode)
+		value = st.evalPrimaryExpressionGroup(node.Base)
+		indexValue := st.evalPrimaryExpressionGroup(node.Index)
+		fields = []string{ fmt.Sprintf("%v", indexValue.Interface()) }
 	} else {
 		fields = left.(*FieldNode).Ident
 		value = st.context
@@ -286,7 +291,7 @@ func (st *Runtime) executeSet(left Expression, right reflect.Value, isdefault bo
 
 RESTART:
 	switch value.Kind() {
-	case reflect.Ptr:
+	case reflect.Ptr, reflect.Interface:
 		value = value.Elem()
 		goto RESTART
 	case reflect.Struct:
@@ -296,7 +301,7 @@ RESTART:
 		}
 		value.Set(right)
 	case reflect.Map:
-		value.SetMapIndex(reflect.ValueOf(&fields[lef]).Elem(), right)
+		value.SetMapIndex(reflect.ValueOf(fields[lef]), right)
 	}
 }
 
