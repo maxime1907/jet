@@ -818,7 +818,7 @@ func (st *Runtime) evalPrimaryExpressionGroup(node Expression) reflect.Value {
 			baseExpression = baseExpression.Elem()
 		}
 
-		ret, err := ParseIndexExpr(baseExpression, indexExpression, indexType)
+		ret, err := st.parseIndexExpr(baseExpression, indexExpression, indexType)
 		if err != nil {
 			node.errorf(err.Error())
 		}
