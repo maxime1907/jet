@@ -79,10 +79,10 @@ const (
 	nodeEnd                        //An end action. Not added to tree.
 	NodeField                      //A field or method name.
 	NodeIdentifier                 //An identifier; always a function name.
-	NodeDefault					   //A default action
-	NodeCase					   //A case action
-	NodeSwitch					   //A switch action
-	NodeFilter					   //A filter action
+	NodeDefault                    //A default action
+	NodeCase                       //A case action
+	NodeSwitch                     //A switch action
+	NodeFilter                     //A filter action
 	NodeIf                         //An if action.
 	NodeList                       //A list of Nodes.
 	NodePipe                       //A pipeline of commands.
