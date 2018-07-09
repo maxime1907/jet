@@ -499,7 +499,7 @@ func (t *Template) parseDefault() (pos Pos, line int, expression Expression, lis
 }
 
 func (t *Template) defaultControl() Node {
-	return t.newDefault(t.parseDefault())	
+	return t.newDefault(t.parseDefault())
 }
 
 func (t *Template) switchControl() Node {

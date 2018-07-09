@@ -107,32 +107,32 @@ const (
 )
 
 var key = map[string]itemType{
-	"extends": 	itemExtends,
-	"import":  	itemImport,
+	"extends": itemExtends,
+	"import":  itemImport,
 
-	"default": 	itemDefault,
-	"include": 	itemInclude,
-	"block":   	itemBlock,
-	"yield":   	itemYield,
+	"default": itemDefault,
+	"include": itemInclude,
+	"block":   itemBlock,
+	"yield":   itemYield,
 
-	"else": 	itemElse,
-	"end":  	itemEnd,
-	"if":   	itemIf,
-	"switch": 	itemSwitch,
+	"else":   itemElse,
+	"end":    itemEnd,
+	"if":     itemIf,
+	"switch": itemSwitch,
 
-	"case": 	itemCase,
+	"case": itemCase,
 
-	"range": 	itemRange,
-	"nil":   	itemNil,
-	"and":   	itemAnd,
-	"or":    	itemOr,
-	"not":   	itemNot,
+	"range": itemRange,
+	"nil":   itemNil,
+	"and":   itemAnd,
+	"or":    itemOr,
+	"not":   itemNot,
 
-	"content": 	itemContent,
-	"msg":     	itemMSG,
-	"trans":   	itemTrans,
-	
-	"filter":  	itemFilter,
+	"content": itemContent,
+	"msg":     itemMSG,
+	"trans":   itemTrans,
+
+	"filter": itemFilter,
 }
 
 const eof = -1
