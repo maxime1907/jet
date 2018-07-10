@@ -498,10 +498,6 @@ func (t *Template) parseDefault() (pos Pos, line int, expression Expression, lis
 	return pos, line, expression, list
 }
 
-func (t *Template) defaultControl() Node {
-	return t.newDefault(t.parseDefault())
-}
-
 func (t *Template) switchControl() Node {
 	return t.newSwitch(t.parseControl(false, "switch"))
 }
@@ -549,8 +545,6 @@ func (t *Template) action() (n Node) {
 		return t.parseYield()
 	case itemFilter:
 		return t.filterControl()
-	case itemDefault:
-		return t.defaultControl()
 	case itemSwitch:
 		return t.switchControl()
 	case itemCase:
