@@ -79,11 +79,10 @@ const (
 	nodeEnd                        //An end action. Not added to tree.
 	NodeField                      //A field or method name.
 	NodeIdentifier                 //An identifier; always a function name.
-	NodeDefault					   //A default action
-	NodeCase					   //A case action
-	NodeSwitch					   //A switch action
-	NodeFilter					   //A filter action
-	NodeWhile					   //A while action
+	NodeCase                       //A case action
+	NodeSwitch                     //A switch action
+	NodeFilter                     //A filter action
+	NodeWhile                      //A while action
 	NodeIf                         //An if action.
 	NodeList                       //A list of Nodes.
 	NodePipe                       //A pipeline of commands.
@@ -602,15 +601,6 @@ func (t *YieldNode) String() string {
 		return fmt.Sprintf("{{yield %s(%s)}}", t.Name, t.Parameters)
 	}
 	return fmt.Sprintf("{{yield %s(%s) %s}}", t.Name, t.Parameters, t.Expression)
-}
-
-// DefaultNode represents a {{default}} action and its commands.
-type DefaultNode struct {
-	BranchNode
-}
-
-func (t *DefaultNode) String() string {
-	return "{{default}}"
 }
 
 // IncludeNode represents a {{include }} action.

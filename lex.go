@@ -101,40 +101,38 @@ const (
 	itemMSG
 	itemTrans
 	itemFilter
-	itemDefault
 	itemSwitch
 	itemCase
 	itemWhile
 )
 
 var key = map[string]itemType{
-	"extends": 	itemExtends,
-	"import":  	itemImport,
+	"extends": itemExtends,
+	"import":  itemImport,
 
-	"default": 	itemDefault,
-	"include": 	itemInclude,
-	"block":   	itemBlock,
-	"yield":   	itemYield,
+	"include": itemInclude,
+	"block":   itemBlock,
+	"yield":   itemYield,
 
-	"else": 	itemElse,
-	"end":  	itemEnd,
-	"if":   	itemIf,
-	"switch": 	itemSwitch,
-	"while": 	itemWhile,
+	"else":   itemElse,
+	"end":    itemEnd,
+	"if":     itemIf,
+	"switch": itemSwitch,
+	"while":  itemWhile,
 
-	"case": 	itemCase,
+	"case": itemCase,
 
-	"range": 	itemRange,
-	"nil":   	itemNil,
-	"and":   	itemAnd,
-	"or":    	itemOr,
-	"not":   	itemNot,
+	"range": itemRange,
+	"nil":   itemNil,
+	"and":   itemAnd,
+	"or":    itemOr,
+	"not":   itemNot,
 
-	"content": 	itemContent,
-	"msg":     	itemMSG,
-	"trans":   	itemTrans,
-	
-	"filter":  	itemFilter,
+	"content": itemContent,
+	"msg":     itemMSG,
+	"trans":   itemTrans,
+
+	"filter": itemFilter,
 }
 
 const eof = -1
