@@ -488,8 +488,6 @@ func (st *Runtime) executeList(list *ListNode) {
 
 	for i := 0; i < len(list.Nodes); i++ {
 		node := list.Nodes[i]
-		fmt.Printf("NODE==[%v]\n", node)
-		fmt.Printf("NODETYPE==%v\n", node.Type())
 		switch node.Type() {
 		case NodeText:
 			node := node.(*TextNode)
