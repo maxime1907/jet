@@ -51,6 +51,8 @@ func (vc VisitorContext) Visit(node jet.Node) {
 		vc.visitSwitchNode(node)
 	case *jet.CaseNode:
 		vc.visitCaseNode(node)
+	case *jet.WhileNode:
+		vc.visitWhileNode(node)
 	case *jet.IfNode:
 		vc.visitIfNode(node)
 	case *jet.PipeNode:
@@ -141,6 +143,10 @@ func (vc VisitorContext) visitSwitchNode(switchNode *jet.SwitchNode) {
 
 func (vc VisitorContext) visitCaseNode(caseNode *jet.CaseNode) {
 	vc.visitBranchNode(&caseNode.BranchNode)
+}
+
+func (vc VisitorContext) visitWhileNode(whileNode *jet.WhileNode) {
+	vc.visitBranchNode(&whileNode.BranchNode)
 }
 
 func (vc VisitorContext) visitIfNode(ifNode *jet.IfNode) {
